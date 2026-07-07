@@ -1,0 +1,12 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\open-folder]
+@="URL:Open Folder Protocol"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\open-folder\shell]
+
+[HKEY_CLASSES_ROOT\open-folder\shell\open]
+
+[HKEY_CLASSES_ROOT\open-folder\shell\open\command]
+@="powershell.exe -WindowStyle Hidden -Command \"$raw = '%1'; $path = [System.Uri]::UnescapeDataString($raw) -replace '^open-folder:',''; explorer $path\""
