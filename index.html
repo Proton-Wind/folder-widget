@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
+    <title>フォルダウィジェット</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            user-select: none;
+        }
+        .widget-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        .folder-link {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #0078d4;
+            font-size: 13px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        .folder-link:hover {
+            background-color: #f0f6ff;
+            transform: translateY(-1px);
+        }
+        .folder-link:active {
+            transform: translateY(0);
+        }
+        .setup-link {
+            color: #666 !important;
+            border: 1px dashed #bbb !important;
+            background-color: #fafafa !important;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-title">📁 共有フォルダリンク</div>
+    
+    <!-- 開きたい共有フォルダのパス -->
+    <a href="open-folder:\\server\share\group-a" class="folder-link">📂 グループA 共有フォルダ</a>
+    <a href="open-folder:\\server\share\design" class="folder-link">📂 デザイン素材置き場</a>
+    <a href="open-folder:\\server\share\templates" class="folder-link">📂 共通テンプレート</a>
+
+    <!-- 共有された他人がダウンロードできるようにするリンク -->
+    <a href="./register_protocol.reg" download class="folder-link setup-link">🔧 初回のみ：事前準備（レジストリ登録）</a>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW registered', reg))
+                .catch(err => console.error('SW register failed', err));
+        }
+    </script>
+</body>
+</html>
