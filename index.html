@@ -24,26 +24,65 @@
             padding-bottom: 5px;
             margin-bottom: 5px;
         }
-        .folder-link {
-            display: flex;
-            align-items: center;
-            padding: 10px;
+        
+        /* 折りたたみ（アコーディオン）全体のスタイル */
+        details {
             background-color: white;
             border: 1px solid #e0e0e0;
             border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+        
+        /* 見出し（親フォルダ）部分 */
+        summary {
+            padding: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            background-color: #fafafa;
+            outline: none;
+            display: flex;
+            align-items: center;
+        }
+        summary:hover {
+            background-color: #f0f6ff;
+        }
+
+        /* 展開された中身（サブフォルダ群）を包むエリア */
+        .sub-folder-container {
+            padding: 8px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background-color: #fff;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        /* サブフォルダや通常フォルダのリンク共通スタイル */
+        .folder-link {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+            background-color: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
             text-decoration: none;
             color: #0078d4;
-            font-size: 13px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            transition: background-color 0.2s, transform 0.1s;
+            font-size: 12.5px;
+            transition: background-color 0.2s;
         }
         .folder-link:hover {
             background-color: #f0f6ff;
-            transform: translateY(-1px);
+            border-color: #0078d4;
         }
-        .folder-link:active {
-            transform: translateY(0);
+
+        /* 階層を下げる（サブフォルダに見せる）ための字下げ設定 */
+        .indent-1 {
+            margin-left: 15px; 
         }
+
         .setup-link {
             color: #666 !important;
             border: 1px dashed #bbb !important;
@@ -55,12 +94,32 @@
 <body>
     <div class="widget-title">📁 共有フォルダリンク</div>
     
-    <!-- 開きたい共有フォルダのパス -->
-    <a href="open-folder:\\server\share\group-a" class="folder-link">📂 グループA 共有フォルダ</a>
-    <a href="open-folder:\\server\share\design" class="folder-link">📂 デザイン素材置き場</a>
-    <a href="open-folder:\\server\share\templates" class="folder-link">📂 共通テンプレート</a>
+    <!-- ▼ 階層1: 折りたたみなしの通常のフォルダリンク -->
+    <a href="open-folder:\\server\share\general" class="folder-link">📂 共通フォルダ</a>
 
-    <!-- 共有された他人がダウンロードできるようにするリンク -->
+    <!-- ▼ 階層2: クリックで展開する親フォルダ -->
+    <details>
+        <summary>📁 グループA（クリックで展開）</summary>
+        <div class="sub-folder-container">
+            <!-- 直接のフォルダ -->
+            <a href="open-folder:\\server\share\group-a" class="folder-link">📂 グループA ルート</a>
+            
+            <!-- インデントをつけてサブフォルダのように見せる -->
+            <a href="open-folder:\\server\share\group-a\project1" class="folder-link indent-1">↳ 📂 プロジェクト1</a>
+            <a href="open-folder:\\server\share\group-a\project1\documents" class="folder-link indent-1">↳ 📂 提出用書類</a>
+        </div>
+    </details>
+
+    <!-- ▼ 階層3: 別の親フォルダ -->
+    <details>
+        <summary>📁 デザイン（クリックで展開）</summary>
+        <div class="sub-folder-container">
+            <a href="open-folder:\\server\share\design" class="folder-link">📂 デザインルート</a>
+            <a href="open-folder:\\server\share\design\assets" class="folder-link indent-1">↳ 📂 素材集</a>
+        </div>
+    </details>
+
+    <!-- 初回用セットアップリンク -->
     <a href="./register_protocol.reg" download class="folder-link setup-link">🔧 初回のみ：事前準備（レジストリ登録）</a>
 
     <script>
