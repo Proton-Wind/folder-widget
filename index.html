@@ -6,9 +6,13 @@
     <link rel="manifest" href="./manifest.json">
     <title>フォルダウィジェット</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             font-family: 'Segoe UI', sans-serif;
-            background-color: #f3f3f3;
+	    backgraoud: transparent !important;
+            background-color: transparent !important;
             margin: 0;
             padding: 15px;
             display: flex;
@@ -19,12 +23,43 @@
         .widget-title {
             font-size: 14px;
             font-weight: bold;
-            color: #333;
+            color: #999;
             border-bottom: 2px solid #0078d4;
             padding-bottom: 5px;
             margin-bottom: 5px;
+	    -webkit-app-region: drag; /* ★ドラッグ移動を許可 */
+	    cursor: move;
+	    user-select: none;
         }
         
+        /* 段組み（列）を囲む親要素を横並びにする設定（間隔を3pxに指定） */
+        body:has(> .column-container),
+        .sub-folder-container:has(> .column-container),
+        .column-container:has(> .column-container) {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 3px;
+            align-items: flex-start;
+        }
+
+        /* 1つの段組み（列 / カラム） */
+        .column-container {
+            display: flex;
+            flex-direction: column; /* 内部のリンクやフォルダは縦に並べる */
+            gap: 5px;
+            flex: 1;
+            min-width: 200px;
+            box-sizing: border-box;
+        }
+
+        /* 段組み内の要素を幅いっぱいに揃える */
+        .column-container > * {
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
         /* 1番外側の折りたたみ（親）全体のスタイル */
         details {
             background-color: white;
@@ -75,9 +110,8 @@
             flex-direction: column;
             gap: 5px;
             background-color: #fff;
-            /* エクスプローラー風の「ツリーの点線」を自動で引く設定 */
             border-left: 1px dotted #ccc;
-            margin-left: 15px; /* 点線の横位置調整 */
+            margin-left: 15px;
         }
 
         /* 実際のフォルダへのリンクスタイル */
@@ -92,6 +126,7 @@
             color: #0078d4;
             font-size: 12px;
             transition: background-color 0.2s, border-color 0.2s;
+            box-sizing: border-box;
         }
         .folder-link:hover {
             background-color: #f0f6ff;
@@ -115,50 +150,43 @@
     </style>
 </head>
 <body>
-    <div class="widget-title">📁 共有フォルダリンク</div>
+    <div class="widget-title">📁 共有フォルダリンクVer.1.0</div>
     
-    <!-- 1段目（大分類） -->
     <details>
         <summary>📁 Test-FileSVR</summary>
         <div class="sub-folder-container">
-        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp" class="folder-link">📂 Test-FileSVR</a>
-          
-            <!-- 2段目（中分類） -->
+            <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp" class="folder-link">📂 Test-FileSVR</a>
             <details>
                 <summary>📁 教務部</summary>
                 <div class="sub-folder-container">
-                <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\※案01_太田\北校舎\分掌\01教務\2008(太田)\01部会" class="folder-link">📂 部会</a>
-                <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\※案01_太田\北校舎\分掌\01教務\2008(太田)\02考査・課題考査" class="folder-link">📂 考査・課題考査</a>
-                    
-                    <!-- 3段目（小分類） -->
-                    <details>
-                        <summary>📁 3段目：2026年度 案件</summary>
-                        <div class="sub-folder-container">
-                            
-                            <!-- 4段目（詳細分類） -->
-                            <details>
-                                <summary>📁 4段目：04月度 資料</summary>
-                                <div class="sub-folder-container">
-                                    <!-- 実際のフォルダを開くリンク -->
-                                    <a href="open-folder:\\server\share\dept-a\2026\04\reports" class="folder-link">📂 日報フォルダを開く</a>
-                                    <a href="open-folder:\\server\share\dept-a\2026\04\invoices" class="folder-link">📂 請求書フォルダを開く</a>
-                                </div>
-                            </details>
-                            
-                            <!-- 4段目の別のフォルダ例 -->
-                            <details>
-                                <summary>📁 4段目：05月度 資料</summary>
-                                <div class="sub-folder-container">
-                                    <a href="open-folder:\\server\share\dept-a\2026\05\reports" class="folder-link">📂 日報フォルダを開く</a>
-                                </div>
-                            </details>
-
-                        </div>
-                    </details>
-                    
+                    <div class="column-container">
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\01部会" class="folder-link">📂 01部会</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\02考査・課題考査" class="folder-link">📂 02考査・課題考査</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\03長期休暇(休みの生活)" class="folder-link">📂 03長期休暇（休みの生活）</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\04学級別成績表" class="folder-link">📂 04学級別成績表</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\05広報・案内(事務より)" class="folder-link">📂 05広報・案内（事務より）</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\06到達度テスト" class="folder-link">📂 06到達度テスト</a>
+                    </div>
+                    <div class="column-container">
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\10時間割" class="folder-link">📂 10時間割</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\11初任者研修" class="folder-link">📂 11初任者研修</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\12教育実習" class="folder-link">📂 12教育実習</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\13学校要覧" class="folder-link">📂 13学校要覧</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\14教科書" class="folder-link">📂 14教科書</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\15補講" class="folder-link">📂 15補講</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\16教育課程・G1説明会" class="folder-link">📂 16教育課程・G1説明会</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\17指導要録" class="folder-link">📂 17指導要録</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\18購入・予算・諸費" class="folder-link">📂 18購入・予算・諸費</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\19入学試験" class="folder-link">📂 19入学試験</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\20判定会議資料" class="folder-link">📂 20判定会議資料</a>
+                    </div>
+                    <div class="column-container">
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\97スクールマスター関係" class="folder-link">📂 97スクールマスター関係</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\98各種届出" class="folder-link">📂 98各種届出</a>
+                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\99その他" class="folder-link">📂 99その他</a>
+                    </div>
                 </div>
             </details>
-            
         </div>
     </details>
 

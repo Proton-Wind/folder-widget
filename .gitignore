@@ -1,0 +1,7 @@
+﻿bin/
+obj/
+node_modules/
+EBWebView/
+*.exe
+*.dll
+フォルダウィジェット-win32-x64/

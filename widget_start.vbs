@@ -1,0 +1,1 @@
+CreateObject("WScript.Shell").Run "cmd /c npx electron .", 0, False

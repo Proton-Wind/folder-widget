@@ -1,0 +1,26 @@
+<Window x:Class="WidgetApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="フォルダウィジェット"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="#01000000"
+        ResizeMode="CanResize"
+        Width="380" Height="600"
+        WindowStartupLocation="Manual"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing"
+        LocationChanged="Window_LocationChanged"
+        SizeChanged="Window_SizeChanged">
+
+    <!-- 外枠8pxをつかんで自由自在にリサイズできる設定 -->
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="0" ResizeBorderThickness="8" GlassFrameThickness="0" CornerRadius="0"/>
+    </WindowChrome.WindowChrome>
+
+    <Grid Background="#01000000">
+        <!-- ★ Margin="6" を指定してリサイズ枠線領域を露出させる -->
+        <wv2:WebView2 x:Name="webView" Margin="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+    </Grid>
+</Window>

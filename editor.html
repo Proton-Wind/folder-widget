@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>フォルダウィジェット・エディター</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        /* ヘッダー・ツールバー */
+        header {
+            background-color: #0078d4;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 16px;
+            margin: 0;
+        }
+        .toolbar-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        /* 自動保存ステータス表示 */
+        .save-status {
+            font-size: 11px;
+            color: #e1f0ff;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+
+        /* ボタン */
+        .btn {
+            background-color: #ffffff;
+            color: #0078d4;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s;
+        }
+        .btn:hover {
+            background-color: #e5f1fb;
+        }
+        .btn-success {
+            background-color: #107c41;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #0b592e;
+        }
+        .btn-secondary {
+            background-color: #eee;
+            color: #333;
+        }
+        .btn-secondary:hover {
+            background-color: #ddd;
+        }
+
+        /* メインエリア（2カラム） */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* 左：ツリー編集エリア */
+        .editor-section {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #ddd;
+            background-color: #fff;
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eee;
+        }
+
+        /* 検索・置換パネル */
+        .search-panel {
+            background-color: #f0f6ff;
+            border: 1px solid #0078d4;
+            border-radius: 6px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .search-panel-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .search-field-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .search-field-group label {
+            font-size: 12px;
+            font-weight: bold;
+            color: #444;
+            width: 35px;
+        }
+        .search-field-group input[type="text"] {
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 12px;
+            width: 200px;
+        }
+        .search-count {
+            font-size: 11px;
+            color: #555;
+            min-width: 65px;
+        }
+        .search-options {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: #444;
+            margin-left: 10px;
+        }
+        .search-options label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .search-highlight {
+            outline: 2px solid #ff9800 !important;
+            background-color: #fff9c4 !important;
+        }
+
+        /* 空状態メッセージ */
+        .empty-message {
+            text-align: center;
+            padding: 50px 20px;
+            color: #777;
+            background-color: #fafafa;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        /* 右：コード出力エリア */
+        .output-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .output-header {
+            background-color: #252526;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        textarea {
+            flex: 1;
+            width: 100%;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            padding: 15px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 12px;
+            resize: none;
+            outline: none;
+            white-space: pre;
+        }
+
+        /* GUI ノードスタイル */
+        .node-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-top: 8px;
+            background-color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            cursor: grab;
+            transition: border-color 0.15s, background-color 0.15s;
+        }
+        .node-card:active {
+            cursor: grabbing;
+        }
+        .node-card.folder {
+            border-left: 4px solid #0078d4;
+            background-color: #fafcff;
+        }
+        .node-card.link {
+            border-left: 4px solid #107c41;
+            background-color: #f7fcf9;
+        }
+        .node-card.row {
+            border-left: 4px solid #8e44ad;
+            background-color: #fdfbff;
+        }
+        
+        /* ドラッグ＆ドロップ用スタイル */
+        .node-card.dragging {
+            opacity: 0.3;
+        }
+        .node-card.drop-before {
+            border-top: 3px solid #0078d4 !important;
+        }
+        .node-card.drop-after {
+            border-bottom: 3px solid #0078d4 !important;
+        }
+        .node-card.drop-inside {
+            outline: 2px dashed #0078d4 !important;
+            background-color: #e5f1fb !important;
+        }
+
+        .drag-handle {
+            color: #aaa;
+            font-size: 14px;
+            cursor: grab;
+            user-select: none;
+            padding-right: 4px;
+        }
+
+        .node-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .node-icon {
+            font-size: 16px;
+        }
+        .node-input {
+            padding: 4px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: text;
+        }
+        .node-input.title {
+            flex: 1;
+            font-weight: bold;
+        }
+        .node-input.path {
+            flex: 2;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .node-actions {
+            display: flex;
+            gap: 4px;
+        }
+        .btn-mini {
+            padding: 2px 6px;
+            font-size: 11px;
+            border-radius: 3px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        .btn-mini:hover {
+            background-color: #eee;
+        }
+        .path-row {
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+        .children-container {
+            margin-left: 15px;
+            padding-left: 10px;
+            border-left: 2px dashed #ddd;
+            min-height: 5px;
+        }
+        
+        #fileInput {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>📁 フォルダウィジェット・エディター</h1>
+        <div class="toolbar-group">
+            <span id="saveStatus" class="save-status">💾 準備完了</span>
+            <button class="btn" onclick="toggleSearchPanel()">🔍 検索・置換</button>
+            <button class="btn btn-secondary" onclick="resetToDefault()">🔄 クリア</button>
+            <button class="btn" onclick="document.getElementById('fileInput').click()">📂 index.htmlを読込</button>
+            <input type="file" id="fileInput" accept=".html" onchange="importHTMLFile(event)">
+            <button class="btn btn-success" onclick="downloadHTML()">💾 index.html をダウンロード</button>
+            <button class="btn" onclick="copyToClipboard()">📋 コードをコピー</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <!-- ツリー構造編集エリア -->
+        <div class="editor-section">
+            <!-- 検索・置換パネル -->
+            <div id="searchPanel" class="search-panel" style="display: none;">
+                <div class="search-panel-row">
+                    <div class="search-field-group">
+                        <label>検索:</label>
+                        <input type="text" id="findInput" placeholder="検索文字列" oninput="performSearch()">
+                        <span id="searchCount" class="search-count">0 / 0 件</span>
+                        <button class="btn-mini" onclick="findPrev()" title="前へ">▲</button>
+                        <button class="btn-mini" onclick="findNext()" title="次へ">▼</button>
+                    </div>
+                    <div class="search-options">
+                        <label><input type="checkbox" id="searchInPath" checked onchange="performSearch()"> パスを対象</label>
+                        <label><input type="checkbox" id="searchInTitle" checked onchange="performSearch()"> 表示名を対象</label>
+                    </div>
+                    <button class="btn-mini" onclick="toggleSearchPanel(false)" style="margin-left: auto;">✕ 閉じる</button>
+                </div>
+                <div class="search-panel-row">
+                    <div class="search-field-group">
+                        <label>置換:</label>
+                        <input type="text" id="replaceInput" placeholder="置換後の文字列">
+                        <button class="btn btn-mini" onclick="replaceCurrent()">1つずつ置換</button>
+                        <button class="btn btn-mini btn-success" onclick="replaceAll()">すべて置換</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-header">
+                <span style="font-weight: bold; font-size: 14px;">階層構造の編集 (ドラッグ＆ドロップで移動可能)</span>
+                <div style="display: flex; gap: 4px;">
+                    <button class="btn btn-secondary" onclick="addRootItem('folder')">📁 親フォルダ追加</button>
+                    <button class="btn btn-secondary" onclick="addRootItem('link')">📂 直下リンク追加</button>
+                    <button class="btn btn-secondary" onclick="addRootItem('row')">📐 段組み（列）追加</button>
+                </div>
+            </div>
+            <div id="treeContainer"></div>
+        </div>
+
+        <!-- リアルタイムコード出力エリア -->
+        <div class="output-section">
+            <div class="output-header">
+                <span style="font-size: 13px; font-weight: bold;">生成される index.html</span>
+            </div>
+            <textarea id="outputCode" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'folder_widget_tree_data';
+        let draggedNodeId = null;
+
+        // 検索関連の状態管理
+        let searchResults = [];
+        let currentSearchIndex = -1;
+
+        // メモリ上のツリーデータ
+        let treeData = loadSavedData();
+        ensureIds(treeData);
+
+        // ID補完
+        function ensureIds(nodes) {
+            nodes.forEach(node => {
+                if (!node.id) {
+                    node.id = 'node_' + Math.random().toString(36).substr(2, 9);
+                }
+                if (node.children) {
+                    ensureIds(node.children);
+                }
+            });
+        }
+
+        // LocalStorage読み込み
+        function loadSavedData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    console.error('保存データの読み込みに失敗しました', e);
+                }
+            }
+            return [];
+        }
+
+        // LocalStorage保存
+        function saveToLocalStorage() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(treeData));
+                const status = document.getElementById('saveStatus');
+                if (status) {
+                    const now = new Date();
+                    const timeStr = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    status.textContent = `💾 自動保存完了 (${timeStr})`;
+                }
+            } catch (e) {
+                console.error('保存に失敗しました', e);
+            }
+        }
+
+        // クリア
+        function resetToDefault() {
+            if (confirm('現在の編集内容をすべてクリアして空にしますか？')) {
+                treeData = [];
+                render();
+            }
+        }
+
+        // IDによるノード検索
+        function findNodeInfo(nodes, id) {
+            for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i].id === id) {
+                    return { node: nodes[i], parentArray: nodes, index: i };
+                }
+                if (nodes[i].children) {
+                    const found = findNodeInfo(nodes[i].children, id);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+
+        // 循環ドロップチェック
+        function isDescendant(parentId, targetId) {
+            if (parentId === targetId) return true;
+            const parentInfo = findNodeInfo(treeData, parentId);
+            if (!parentInfo || !parentInfo.node.children) return false;
+
+            function check(children) {
+                for (const child of children) {
+                    if (child.id === targetId) return true;
+                    if (child.children && check(child.children)) return true;
+                }
+                return false;
+            }
+            return check(parentInfo.node.children);
+        }
+
+        // ドロップ表示クリア
+        function clearDropIndicators() {
+            document.querySelectorAll('.drop-before, .drop-after, .drop-inside').forEach(el => {
+                el.classList.remove('drop-before', 'drop-after', 'drop-inside');
+            });
+        }
+
+        // ノード移動実行
+        function executeMove(sourceId, targetId, position) {
+            const srcInfo = findNodeInfo(treeData, sourceId);
+            if (!srcInfo) return;
+
+            const [movedNode] = srcInfo.parentArray.splice(srcInfo.index, 1);
+            const targetInfo = findNodeInfo(treeData, targetId);
+
+            if (!targetInfo) {
+                treeData.push(movedNode);
+                render();
+                return;
+            }
+
+            if (position === 'inside' && (targetInfo.node.type === 'folder' || targetInfo.node.type === 'row')) {
+                if (!targetInfo.node.children) targetInfo.node.children = [];
+                targetInfo.node.children.push(movedNode);
+            } else if (position === 'before') {
+                targetInfo.parentArray.splice(targetInfo.index, 0, movedNode);
+            } else if (position === 'after') {
+                targetInfo.parentArray.splice(targetInfo.index + 1, 0, movedNode);
+            }
+
+            render();
+        }
+
+        /* --- 検索・置換機能 --- */
+
+        function escapeRegExp(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function toggleSearchPanel(show) {
+            const panel = document.getElementById('searchPanel');
+            if (show === undefined) {
+                show = panel.style.display === 'none';
+            }
+            panel.style.display = show ? 'flex' : 'none';
+            if (show) {
+                const input = document.getElementById('findInput');
+                input.focus();
+                input.select();
+                performSearch();
+            } else {
+                clearSearchHighlights();
+            }
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                toggleSearchPanel(true);
+            }
+        });
+
+        function performSearch() {
+            const panel = document.getElementById('searchPanel');
+            if (panel.style.display === 'none') return;
+
+            const term = document.getElementById('findInput').value;
+            searchResults = [];
+            
+            if (!term) {
+                updateSearchUI();
+                clearSearchHighlights();
+                return;
+            }
+
+            const searchInPath = document.getElementById('searchInPath').checked;
+            const searchInTitle = document.getElementById('searchInTitle').checked;
+
+            function searchNodes(nodes) {
+                for (const node of nodes) {
+                    if (searchInTitle && node.title && node.title.toLowerCase().includes(term.toLowerCase())) {
+                        searchResults.push({ nodeId: node.id, field: 'title', node: node });
+                    }
+                    if (searchInPath && node.type === 'link' && node.path && node.path.toLowerCase().includes(term.toLowerCase())) {
+                        searchResults.push({ nodeId: node.id, field: 'path', node: node });
+                    }
+                    if (node.children) {
+                        searchNodes(node.children);
+                    }
+                }
+            }
+
+            searchNodes(treeData);
+
+            if (searchResults.length > 0) {
+                if (currentSearchIndex >= searchResults.length || currentSearchIndex < 0) {
+                    currentSearchIndex = 0;
+                }
+                highlightCurrentResult();
+            } else {
+                currentSearchIndex = -1;
+                clearSearchHighlights();
+            }
+            updateSearchUI();
+        }
+
+        function findPrev() {
+            if (searchResults.length === 0) return;
+            currentSearchIndex = (currentSearchIndex - 1 + searchResults.length) % searchResults.length;
+            highlightCurrentResult();
+            updateSearchUI();
+        }
+
+        function findNext() {
+            if (searchResults.length === 0) return;
+            currentSearchIndex = (currentSearchIndex + 1) % searchResults.length;
+            highlightCurrentResult();
+            updateSearchUI();
+        }
+
+        function updateSearchUI() {
+            const countEl = document.getElementById('searchCount');
+            if (searchResults.length === 0) {
+                countEl.textContent = '0 / 0 件';
+            } else {
+                countEl.textContent = `${currentSearchIndex + 1} / ${searchResults.length} 件`;
+            }
+        }
+
+        function clearSearchHighlights() {
+            document.querySelectorAll('.search-highlight').forEach(el => {
+                el.classList.remove('search-highlight');
+            });
+        }
+
+        function highlightCurrentResult() {
+            clearSearchHighlights();
+            if (searchResults.length === 0 || currentSearchIndex < 0) return;
+
+            const item = searchResults[currentSearchIndex];
+            const selector = `.node-card[data-node-id="${item.nodeId}"] input[data-field="${item.field}"]`;
+            const inputEl = document.querySelector(selector);
+
+            if (inputEl) {
+                inputEl.classList.add('search-highlight');
+                inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                inputEl.focus();
+            }
+        }
+
+        function replaceCurrent() {
+            const term = document.getElementById('findInput').value;
+            const replacement = document.getElementById('replaceInput').value;
+
+            if (!term || searchResults.length === 0 || currentSearchIndex < 0) return;
+
+            const item = searchResults[currentSearchIndex];
+            const regex = new RegExp(escapeRegExp(term), 'i');
+
+            if (item.field === 'title' && item.node.title) {
+                item.node.title = item.node.title.replace(regex, replacement);
+            } else if (item.field === 'path' && item.node.path) {
+                item.node.path = item.node.path.replace(regex, replacement);
+            }
+
+            render();
+            performSearch();
+        }
+
+        function replaceAll() {
+            const term = document.getElementById('findInput').value;
+            const replacement = document.getElementById('replaceInput').value;
+
+            if (!term) return;
+
+            const searchInPath = document.getElementById('searchInPath').checked;
+            const searchInTitle = document.getElementById('searchInTitle').checked;
+
+            if (!searchInPath && !searchInTitle) {
+                alert('検索対象（パスまたは表示名）を1つ以上選択してください。');
+                return;
+            }
+
+            let count = 0;
+            const regex = new RegExp(escapeRegExp(term), 'gi');
+
+            function replaceInNodes(nodes) {
+                for (const node of nodes) {
+                    if (searchInTitle && node.title) {
+                        const matches = node.title.match(regex);
+                        if (matches) count += matches.length;
+                        node.title = node.title.replace(regex, replacement);
+                    }
+                    if (searchInPath && node.type === 'link' && node.path) {
+                        const matches = node.path.match(regex);
+                        if (matches) count += matches.length;
+                        node.path = node.path.replace(regex, replacement);
+                    }
+                    if (node.children) {
+                        replaceInNodes(node.children);
+                    }
+                }
+            }
+
+            replaceInNodes(treeData);
+
+            if (count > 0) {
+                render();
+                performSearch();
+                alert(`${count}箇所の文字列を置換しました。`);
+            } else {
+                alert('該当する文字列が見つかりませんでした。');
+            }
+        }
+
+        /* --- 画面描画 --- */
+
+        function render() {
+            ensureIds(treeData);
+            const container = document.getElementById('treeContainer');
+            container.innerHTML = '';
+
+            if (treeData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-message">
+                        <p style="font-size: 16px; font-weight: bold; margin: 0 0 10px 0; color: #555;">📁 項目が登録されていません</p>
+                        <p style="font-size: 13px; margin: 0; line-height: 1.6;">
+                            右上の <b>「📁 親フォルダ追加」</b> <b>「📂 直下リンク追加」</b> <b>「📐 段組み（列）追加」</b> ボタンで作成するか、<br>
+                            <b>「📂 index.htmlを読込」</b> ボタンから既存のファイルを読み込んでください。
+                        </p>
+                    </div>
+                `;
+            } else {
+                treeData.forEach((node, index) => {
+                    container.appendChild(createNodeUI(node, treeData, index));
+                });
+            }
+            
+            updateOutputHTML();
+            performSearch();
+        }
+
+        // GUIのノードカード生成 (再帰処理)
+        function createNodeUI(node, parentArray, index) {
+            const card = document.createElement('div');
+            card.className = `node-card ${node.type}`;
+            card.dataset.nodeId = node.id;
+            card.draggable = true;
+
+            // ドラッグ＆ドロップイベント
+            card.addEventListener('dragstart', (e) => {
+                e.stopPropagation();
+                draggedNodeId = node.id;
+                card.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', node.id);
+            });
+
+            card.addEventListener('dragend', (e) => {
+                e.stopPropagation();
+                card.classList.remove('dragging');
+                draggedNodeId = null;
+                clearDropIndicators();
+            });
+
+            card.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!draggedNodeId || isDescendant(draggedNodeId, node.id)) {
+                    e.dataTransfer.dropEffect = 'none';
+                    return;
+                }
+
+                e.dataTransfer.dropEffect = 'move';
+                const rect = card.getBoundingClientRect();
+                const offsetY = e.clientY - rect.top;
+                const height = rect.height;
+
+                clearDropIndicators();
+
+                if (node.type === 'folder' || node.type === 'row') {
+                    if (offsetY < height * 0.25) {
+                        card.classList.add('drop-before');
+                    } else if (offsetY > height * 0.75) {
+                        card.classList.add('drop-after');
+                    } else {
+                        card.classList.add('drop-inside');
+                    }
+                } else {
+                    if (offsetY < height * 0.5) {
+                        card.classList.add('drop-before');
+                    } else {
+                        card.classList.add('drop-after');
+                    }
+                }
+            });
+
+            card.addEventListener('dragleave', (e) => {
+                e.stopPropagation();
+                card.classList.remove('drop-before', 'drop-after', 'drop-inside');
+            });
+
+            card.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!draggedNodeId || isDescendant(draggedNodeId, node.id)) {
+                    return;
+                }
+
+                let position = 'after';
+                if (card.classList.contains('drop-before')) position = 'before';
+                else if (card.classList.contains('drop-inside')) position = 'inside';
+                else if (card.classList.contains('drop-after')) position = 'after';
+
+                clearDropIndicators();
+                executeMove(draggedNodeId, node.id, position);
+            });
+
+            // ヘッダー行
+            const header = document.createElement('div');
+            header.className = 'node-header';
+
+            const dragHandle = document.createElement('span');
+            dragHandle.className = 'drag-handle';
+            dragHandle.innerHTML = '☰';
+            dragHandle.title = 'ドラッグして順序や階層を変更';
+
+            const icon = document.createElement('span');
+            icon.className = 'node-icon';
+            icon.textContent = node.type === 'folder' ? '📁' : (node.type === 'row' ? '📐' : '📂');
+
+            const titleInput = document.createElement('input');
+            titleInput.type = 'text';
+            titleInput.className = 'node-input title';
+            titleInput.dataset.field = 'title';
+            titleInput.value = node.title;
+            titleInput.placeholder = node.type === 'folder' ? 'フォルダ表示名' : (node.type === 'row' ? '段組みグループ名（任意）' : 'リンク表示名');
+            titleInput.onmousedown = (e) => e.stopPropagation();
+            titleInput.oninput = (e) => {
+                node.title = e.target.value;
+                updateOutputHTML();
+                performSearch();
+            };
+
+            // 操作ボタン群
+            const actions = document.createElement('div');
+            actions.className = 'node-actions';
+
+            const btnUp = document.createElement('button');
+            btnUp.className = 'btn-mini';
+            btnUp.textContent = '▲';
+            btnUp.disabled = index === 0;
+            btnUp.onclick = (e) => { e.stopPropagation(); swap(parentArray, index, index - 1); render(); };
+
+            const btnDown = document.createElement('button');
+            btnDown.className = 'btn-mini';
+            btnDown.textContent = '▼';
+            btnDown.disabled = index === parentArray.length - 1;
+            btnDown.onclick = (e) => { e.stopPropagation(); swap(parentArray, index, index + 1); render(); };
+
+            const btnDel = document.createElement('button');
+            btnDel.className = 'btn-mini';
+            btnDel.style.color = 'red';
+            btnDel.textContent = '✕ 削除';
+            btnDel.onclick = (e) => {
+                e.stopPropagation();
+                if (confirm(`「${node.title}」を削除しますか？`)) {
+                    parentArray.splice(index, 1);
+                    render();
+                }
+            };
+
+            actions.appendChild(btnUp);
+            actions.appendChild(btnDown);
+
+            if (node.type === 'folder' || node.type === 'row') {
+                const btnAddSubFolder = document.createElement('button');
+                btnAddSubFolder.className = 'btn-mini';
+                btnAddSubFolder.textContent = '📁+';
+                btnAddSubFolder.title = 'サブフォルダ追加';
+                btnAddSubFolder.onclick = (e) => {
+                    e.stopPropagation();
+                    node.children.push({ id: 'node_' + Math.random().toString(36).substr(2, 9), type: 'folder', title: '新しいフォルダ', children: [] });
+                    render();
+                };
+
+                const btnAddSubLink = document.createElement('button');
+                btnAddSubLink.className = 'btn-mini';
+                btnAddSubLink.textContent = '📂+';
+                btnAddSubLink.title = 'リンク追加';
+                btnAddSubLink.onclick = (e) => {
+                    e.stopPropagation();
+                    node.children.push({ id: 'node_' + Math.random().toString(36).substr(2, 9), type: 'link', title: '新しいリンク', path: '\\\\server\\share' });
+                    render();
+                };
+
+                const btnAddSubRow = document.createElement('button');
+                btnAddSubRow.className = 'btn-mini';
+                btnAddSubRow.textContent = '📐+';
+                btnAddSubRow.title = 'ネスト段組み追加';
+                btnAddSubRow.onclick = (e) => {
+                    e.stopPropagation();
+                    node.children.push({ id: 'node_' + Math.random().toString(36).substr(2, 9), type: 'row', title: '段組み（列）', children: [] });
+                    render();
+                };
+
+                actions.appendChild(btnAddSubFolder);
+                actions.appendChild(btnAddSubLink);
+                actions.appendChild(btnAddSubRow);
+            }
+
+            actions.appendChild(btnDel);
+
+            header.appendChild(dragHandle);
+            header.appendChild(icon);
+            header.appendChild(titleInput);
+            header.appendChild(actions);
+            card.appendChild(header);
+
+            // リンク用 パス入力行
+            if (node.type === 'link') {
+                const pathRow = document.createElement('div');
+                pathRow.className = 'path-row';
+                
+                const label = document.createElement('span');
+                label.textContent = 'パス: ';
+
+                const pathInput = document.createElement('input');
+                pathInput.type = 'text';
+                pathInput.className = 'node-input path';
+                pathInput.dataset.field = 'path';
+                pathInput.value = node.path;
+                pathInput.placeholder = '\\\\server\\share\\folder';
+                pathInput.onmousedown = (e) => e.stopPropagation();
+                pathInput.oninput = (e) => {
+                    node.path = e.target.value;
+                    updateOutputHTML();
+                    performSearch();
+                };
+
+                pathRow.appendChild(label);
+                pathRow.appendChild(pathInput);
+                card.appendChild(pathRow);
+            }
+
+            // サブ要素（フォルダまたは段組みの場合）
+            if ((node.type === 'folder' || node.type === 'row') && node.children) {
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = 'children-container';
+                node.children.forEach((child, childIndex) => {
+                    childrenContainer.appendChild(createNodeUI(child, node.children, childIndex));
+                });
+                card.appendChild(childrenContainer);
+            }
+
+            return card;
+        }
+
+        // 配列要素の入れ替え
+        function swap(arr, i, j) {
+            const temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+
+        // 最上階層への追加
+        function addRootItem(type) {
+            const newId = 'node_' + Math.random().toString(36).substr(2, 9);
+            if (type === 'folder') {
+                treeData.push({ id: newId, type: 'folder', title: '新しい親フォルダ', children: [] });
+            } else if (type === 'link') {
+                treeData.push({ id: newId, type: 'link', title: '新しい直下リンク', path: '\\\\server\\share' });
+            } else if (type === 'row') {
+                treeData.push({ id: newId, type: 'row', title: '段組み（列）', children: [] });
+            }
+            render();
+        }
+
+        // HTML生成＆自動保存呼び出し
+        function updateOutputHTML() {
+            const codeArea = document.getElementById('outputCode');
+            codeArea.value = generateHTMLCode(treeData);
+            saveToLocalStorage();
+        }
+
+        function generateHTMLCode(data) {
+            function escapeHtml(str) {
+                return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+            }
+
+            function cleanTitle(title, prefix) {
+                let cleaned = (title || '').replace(/^(📁|📂)\s*/, '').trim();
+                return `${prefix} ${cleaned}`;
+            }
+
+            function buildHTML(nodes, indentLevel) {
+                let html = '';
+                const indent = '    '.repeat(indentLevel);
+                
+                for (const node of nodes) {
+                    if (node.type === 'folder') {
+                        html += `${indent}<details>\n`;
+                        html += `${indent}    <summary>${escapeHtml(cleanTitle(node.title, '📁'))}</summary>\n`;
+                        html += `${indent}    <div class="sub-folder-container">\n`;
+                        html += buildHTML(node.children || [], indentLevel + 2);
+                        html += `${indent}    </div>\n`;
+                        html += `${indent}</details>\n`;
+                    } else if (node.type === 'link') {
+                        let path = (node.path || '').trim();
+                        let href = path.startsWith('open-folder:') ? path : `open-folder:${path}`;
+                        html += `${indent}<a href="${escapeHtml(href)}" class="folder-link">${escapeHtml(cleanTitle(node.title, '📂'))}</a>\n`;
+                    } else if (node.type === 'row') {
+                        html += `${indent}<div class="column-container">\n`;
+                        html += buildHTML(node.children || [], indentLevel + 1);
+                        html += `${indent}</div>\n`;
+                    }
+                }
+                return html;
+            }
+
+            const bodyContent = buildHTML(data, 1);
+
+            return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="./manifest.json">
+    <title>フォルダウィジェット</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            user-select: none;
+        }
+        .widget-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            border-bottom: 2px solid #0078d4;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        
+        /* 段組み（列）を囲む親要素を横並びにする設定（間隔を3pxに指定） */
+        body:has(> .column-container),
+        .sub-folder-container:has(> .column-container),
+        .column-container:has(> .column-container) {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 3px;
+            align-items: flex-start;
+        }
+
+        /* 1つの段組み（列 / カラム） */
+        .column-container {
+            display: flex;
+            flex-direction: column; /* 内部のリンクやフォルダは縦に並べる */
+            gap: 5px;
+            flex: 1;
+            min-width: 200px;
+            box-sizing: border-box;
+        }
+
+        /* 段組み内の要素を幅いっぱいに揃える */
+        .column-container > * {
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        /* 1番外側の折りたたみ（親）全体のスタイル */
+        details {
+            background-color: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+        
+        /* 2段目以降の内側のdetailsは、不要な枠線や角丸を消してすっきりさせる */
+        details details {
+            border: none;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        /* 1段目の親フォルダの見出し */
+        summary {
+            padding: 10px;
+            font-size: 13.5px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            background-color: #fafafa;
+            outline: none;
+            display: flex;
+            align-items: center;
+        }
+        summary:hover {
+            background-color: #f0f6ff;
+        }
+
+        /* 2段目以降のサブフォルダの見出し（文字を少し細く、背景を透明に） */
+        details details summary {
+            font-size: 12.5px;
+            font-weight: normal;
+            background-color: transparent;
+            padding: 6px 10px;
+        }
+        details details summary:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 展開された中身（サブフォルダ群）を包むエリア */
+        .sub-folder-container {
+            padding: 4px 0 4px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            background-color: #fff;
+            border-left: 1px dotted #ccc;
+            margin-left: 15px;
+        }
+
+        /* 実際のフォルダへのリンクスタイル */
+        .folder-link {
+            display: flex;
+            align-items: center;
+            padding: 6px 10px;
+            background-color: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #0078d4;
+            font-size: 12px;
+            transition: background-color 0.2s, border-color 0.2s;
+            box-sizing: border-box;
+        }
+        .folder-link:hover {
+            background-color: #f0f6ff;
+            border-color: #0078d4;
+        }
+
+        /* 外側に直置きされている通常のリンク用 */
+        body > .folder-link {
+            padding: 10px;
+            font-size: 13.5px;
+            font-weight: bold;
+            border-radius: 6px;
+        }
+
+        .setup-link {
+            color: #666 !important;
+            border: 1px dashed #bbb !important;
+            background-color: #fafafa !important;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-title">📁 共有フォルダリンク</div>
+    
+${bodyContent}
+    <!-- 初回用セットアップリンク -->
+    <a href="./register_protocol.reg" download class="folder-link setup-link">🔧 初回のみ：事前準備（レジストリ登録）</a>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => console.log('SW registered', reg))
+                .catch(err => console.error('SW register failed', err));
+        }
+    <\/script>
+</body>
+</html>`;
+        }
+
+        // ダウンロード
+        function downloadHTML() {
+            const htmlContent = document.getElementById('outputCode').value;
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'index.html';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        // コードコピー
+        function copyToClipboard() {
+            const codeArea = document.getElementById('outputCode');
+            codeArea.select();
+            document.execCommand('copy');
+            alert('HTMLコードをクリップボードにコピーしました！');
+        }
+
+        // ファイルインポート
+        function importHTMLFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const htmlText = e.target.result;
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlText, 'text/html');
+                
+                function parseContainer(element) {
+                    const nodes = [];
+                    for (const child of element.children) {
+                        if (child.tagName.toLowerCase() === 'details') {
+                            const summary = child.querySelector(':scope > summary');
+                            let rawTitle = summary ? summary.textContent.trim() : 'フォルダ';
+                            let title = rawTitle.replace(/^📁\s*/, '');
+                            
+                            const subContainer = child.querySelector(':scope > .sub-folder-container');
+                            const children = subContainer ? parseContainer(subContainer) : [];
+                            
+                            nodes.push({ id: 'node_' + Math.random().toString(36).substr(2, 9), type: 'folder', title: title, children: children });
+                        } else if (child.tagName.toLowerCase() === 'a' && child.classList.contains('folder-link')) {
+                            if (child.classList.contains('setup-link')) continue;
+                            
+                            let rawTitle = child.textContent.trim();
+                            let title = rawTitle.replace(/^📂\s*/, '');
+                            let href = child.getAttribute('href') || '';
+                            let path = href.replace(/^open-folder:\\?/, '');
+                            
+                            nodes.push({ id: 'node_' + Math.random().toString(36).substr(2, 9), type: 'link', title: title, path: path });
+                        } else if (child.classList.contains('column-container')) {
+                            const children = parseContainer(child);
+                            nodes.push({ id: 'node_' + Math.random().toString(36).substr(2, 9), type: 'row', title: '段組み（列）', children: children });
+                        }
+                    }
+                    return nodes;
+                }
+
+                const importedData = parseContainer(doc.body);
+                if (importedData.length > 0) {
+                    treeData = importedData;
+                    render();
+                    alert('index.html の読み込みに成功しました！');
+                } else {
+                    alert('有効なフォルダ構造が見つかりませんでした。');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // 初期描画実行
+        render();
+    </script>
+</body>
+</html>
