@@ -22,7 +22,7 @@
         .widget-title {
             font-size: 14px;
             font-weight: bold;
-            color: #A9B;
+            color: #333;
             border-bottom: 2px solid #0078d4;
             padding-bottom: 5px;
             margin-bottom: 5px;
@@ -45,7 +45,7 @@
             flex-direction: column; /* 内部のリンクやフォルダは縦に並べる */
             gap: 5px;
             flex: 1;
-            min-width: 120px;
+            min-width: 90px;
             box-sizing: border-box;
         }
 
@@ -215,7 +215,7 @@
     </details>
 
     <!-- 初回用セットアップリンク -->
-    <a href="setup.bat" download class="folder-link setup-link">🔧 初回のみ：事前準備（レジストリ登録）</a>
+    <a href="./setup.bat" download class="folder-link setup-link">🔧 初回のみ：事前準備（レジストリ登録）</a>
 
     <script>
         if ('serviceWorker' in navigator) {
