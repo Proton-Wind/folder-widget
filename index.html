@@ -11,8 +11,7 @@
         }
         body {
             font-family: 'Segoe UI', sans-serif;
-	    backgraoud: transparent !important;
-            background-color: transparent !important;
+            background-color: #f3f3f3;
             margin: 0;
             padding: 15px;
             display: flex;
@@ -23,13 +22,10 @@
         .widget-title {
             font-size: 14px;
             font-weight: bold;
-            color: #999;
+            color: #333;
             border-bottom: 2px solid #0078d4;
             padding-bottom: 5px;
             margin-bottom: 5px;
-	    -webkit-app-region: drag; /* ★ドラッグ移動を許可 */
-	    cursor: move;
-	    user-select: none;
         }
         
         /* 段組み（列）を囲む親要素を横並びにする設定（間隔を3pxに指定） */
@@ -150,48 +146,76 @@
     </style>
 </head>
 <body>
-    <div class="widget-title">📁 共有フォルダリンクVer.1.0</div>
+    <div class="widget-title">📁 共有フォルダリンク</div>
     
-    <details>
-        <summary>📁 Test-FileSVR</summary>
+    <a href="open-folder:\\base" class="folder-link">📂 base</a>
+    <details open>
+        <summary>📁 スクールマスター補助</summary>
         <div class="sub-folder-container">
-            <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp" class="folder-link">📂 Test-FileSVR</a>
-            <details>
-                <summary>📁 教務部</summary>
+            <details open>
+                <summary>📁 一学期中間</summary>
                 <div class="sub-folder-container">
                     <div class="column-container">
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\01部会" class="folder-link">📂 01部会</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\02考査・課題考査" class="folder-link">📂 02考査・課題考査</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\03長期休暇(休みの生活)" class="folder-link">📂 03長期休暇（休みの生活）</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\04学級別成績表" class="folder-link">📂 04学級別成績表</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\05広報・案内(事務より)" class="folder-link">📂 05広報・案内（事務より）</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\06到達度テスト" class="folder-link">📂 06到達度テスト</a>
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\一学期中間\素点" class="folder-link">📂 素点</a>
+                    </div>
+                </div>
+            </details>
+            <details open>
+                <summary>📁 一学期期末</summary>
+                <div class="sub-folder-container">
+                    <div class="column-container">
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\一学期期末\素点" class="folder-link">📂 素点</a>
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\一学期期末\評点" class="folder-link">📂 評点</a>
                     </div>
                     <div class="column-container">
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\10時間割" class="folder-link">📂 10時間割</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\11初任者研修" class="folder-link">📂 11初任者研修</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\12教育実習" class="folder-link">📂 12教育実習</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\13学校要覧" class="folder-link">📂 13学校要覧</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\14教科書" class="folder-link">📂 14教科書</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\15補講" class="folder-link">📂 15補講</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\16教育課程・G1説明会" class="folder-link">📂 16教育課程・G1説明会</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\17指導要録" class="folder-link">📂 17指導要録</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\18購入・予算・諸費" class="folder-link">📂 18購入・予算・諸費</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\19入学試験" class="folder-link">📂 19入学試験</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\20判定会議資料" class="folder-link">📂 20判定会議資料</a>
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\一学期期末\評定" class="folder-link">📂 評定</a>
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\一学期期末\観点" class="folder-link">📂 観点</a>
+                    </div>
+                </div>
+            </details>
+            <details open>
+                <summary>📁 二学期中間</summary>
+                <div class="sub-folder-container">
+                    <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\二学期中間\素点" class="folder-link">📂 素点</a>
+                </div>
+            </details>
+            <details open>
+                <summary>📁 二学期期末</summary>
+                <div class="sub-folder-container">
+                    <div class="column-container">
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\二学期期末\素点" class="folder-link">📂 素点</a>
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\二学期期末\評点" class="folder-link">📂 評点</a>
                     </div>
                     <div class="column-container">
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\97スクールマスター関係" class="folder-link">📂 97スクールマスター関係</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\98各種届出" class="folder-link">📂 98各種届出</a>
-                        <a href="open-folder:\\Test-FileSVR.nd.meiden.ed.jp\高校(BASE)_学校共有\北校舎\分掌\01教務\2008(太田)\99その他" class="folder-link">📂 99その他</a>
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\二学期期末\評定" class="folder-link">📂 評定</a>
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\二学期期末\観点" class="folder-link">📂 観点</a>
+                    </div>
+                </div>
+            </details>
+            <details open>
+                <summary>📁 学年末</summary>
+                <div class="sub-folder-container">
+                    <div class="column-container">
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\学年末\素点" class="folder-link">📂 素点</a>
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\学年末\評点" class="folder-link">📂 評点</a>
+                    </div>
+                    <div class="column-container">
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\学年末\評定" class="folder-link">📂 評定</a>
+                        <a href="open-folder:\\base\成績集計\スクールマスター補助\R08\学年末\観点" class="folder-link">📂 観点</a>
                     </div>
                 </div>
             </details>
         </div>
     </details>
+    <details open>
+        <summary>📁 文書管理共有</summary>
+        <div class="sub-folder-container">
+            <a href="open-folder:\\base\文書管理共有\教務部\到達度テスト\R08(太田)" class="folder-link">📂 到達度テスト</a>
+        </div>
+    </details>
 
     <!-- 初回用セットアップリンク -->
-    <a href="./setup.txt" download class="folder-link setup-link">🔧 初回のみ：.txtを.batに変えて実行</a>
+    <a href="./register_protocol.reg" download class="folder-link setup-link">🔧 初回のみ：事前準備（レジストリ登録）</a>
 
     <script>
         if ('serviceWorker' in navigator) {

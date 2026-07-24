@@ -77,7 +77,7 @@ namespace WidgetApp
                 ");
 
                 // ★ご自身の GitHub Pages URL に書き換えてください
-                string targetUrl = "https://meiden-widget.nd.meiden.ed.jp/h-folder-widget/";
+                string targetUrl = "https://proton-wind.github.io/folder-widget/index.html";
 
                 if (Uri.TryCreate(targetUrl, UriKind.Absolute, out Uri? uriResult) && uriResult != null)
                 {

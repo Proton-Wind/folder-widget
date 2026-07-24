@@ -176,34 +176,29 @@
             margin-top: 20px;
         }
 
-        /* 右：コード出力エリア */
+        /* 右：プレビューエリア */
         .output-section {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
+            background-color: #e9ecef;
+            color: #333;
         }
         .output-header {
             background-color: #252526;
+            color: #ffffff;
             padding: 10px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid #333;
         }
-        textarea {
+        #previewFrame {
             flex: 1;
             width: 100%;
-            background-color: #1e1e1e;
-            color: #d4d4d4;
+            height: 100%;
             border: none;
-            padding: 15px;
-            font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 12px;
-            resize: none;
-            outline: none;
-            white-space: pre;
+            background-color: #f3f3f3;
         }
 
         /* GUI ノードスタイル */
@@ -260,6 +255,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
         .node-icon {
             font-size: 16px;
@@ -273,6 +269,7 @@
         }
         .node-input.title {
             flex: 1;
+            min-width: 150px;
             font-weight: bold;
         }
         .node-input.path {
@@ -280,9 +277,23 @@
             font-family: monospace;
             font-size: 12px;
         }
+        .node-open-opt {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 11px;
+            color: #0078d4;
+            background-color: #eef6ff;
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid #cce4ff;
+            cursor: pointer;
+            user-select: none;
+        }
         .node-actions {
             display: flex;
             gap: 4px;
+            margin-left: auto;
         }
         .btn-mini {
             padding: 2px 6px;
@@ -370,12 +381,12 @@
             <div id="treeContainer"></div>
         </div>
 
-        <!-- リアルタイムコード出力エリア -->
+        <!-- リアルタイムプレビュー表示エリア -->
         <div class="output-section">
             <div class="output-header">
-                <span style="font-size: 13px; font-weight: bold;">生成される index.html</span>
+                <span style="font-size: 13px; font-weight: bold;">🖥️ プレビュー (実物の HTML 画面)</span>
             </div>
-            <textarea id="outputCode" readonly></textarea>
+            <iframe id="previewFrame" title="プレビュー"></iframe>
         </div>
     </div>
 
@@ -396,6 +407,9 @@
             nodes.forEach(node => {
                 if (!node.id) {
                     node.id = 'node_' + Math.random().toString(36).substr(2, 9);
+                }
+                if (node.type === 'folder' && node.open === undefined) {
+                    node.open = false; // デフォルトは折りたたみ
                 }
                 if (node.children) {
                     ensureIds(node.children);
@@ -815,6 +829,30 @@
                 performSearch();
             };
 
+            header.appendChild(dragHandle);
+            header.appendChild(icon);
+            header.appendChild(titleInput);
+
+            // フォルダ初期開閉設定オプション（フォルダの場合のみ表示）
+            if (node.type === 'folder') {
+                const openOpt = document.createElement('label');
+                openOpt.className = 'node-open-opt';
+                openOpt.title = 'チェックを入れると、起動時にフォルダが展開された状態で表示されます';
+                openOpt.onmousedown = (e) => e.stopPropagation();
+
+                const chk = document.createElement('input');
+                chk.type = 'checkbox';
+                chk.checked = !!node.open;
+                chk.onchange = (e) => {
+                    node.open = e.target.checked;
+                    updateOutputHTML();
+                };
+
+                openOpt.appendChild(chk);
+                openOpt.appendChild(document.createTextNode('最初から開く'));
+                header.appendChild(openOpt);
+            }
+
             // 操作ボタン群
             const actions = document.createElement('div');
             actions.className = 'node-actions';
@@ -853,7 +891,7 @@
                 btnAddSubFolder.title = 'サブフォルダ追加';
                 btnAddSubFolder.onclick = (e) => {
                     e.stopPropagation();
-                    node.children.push({ id: 'node_' + Math.random().toString(36).substr(2, 9), type: 'folder', title: '新しいフォルダ', children: [] });
+                    node.children.push({ id: 'node_' + Math.random().toString(36).substr(2, 9), type: 'folder', title: '新しいフォルダ', open: false, children: [] });
                     render();
                 };
 
@@ -883,10 +921,6 @@
             }
 
             actions.appendChild(btnDel);
-
-            header.appendChild(dragHandle);
-            header.appendChild(icon);
-            header.appendChild(titleInput);
             header.appendChild(actions);
             card.appendChild(header);
 
@@ -940,7 +974,7 @@
         function addRootItem(type) {
             const newId = 'node_' + Math.random().toString(36).substr(2, 9);
             if (type === 'folder') {
-                treeData.push({ id: newId, type: 'folder', title: '新しい親フォルダ', children: [] });
+                treeData.push({ id: newId, type: 'folder', title: '新しい親フォルダ', open: false, children: [] });
             } else if (type === 'link') {
                 treeData.push({ id: newId, type: 'link', title: '新しい直下リンク', path: '\\\\server\\share' });
             } else if (type === 'row') {
@@ -949,10 +983,13 @@
             render();
         }
 
-        // HTML生成＆自動保存呼び出し
+        // プレビューHTML更新＆自動保存呼び出し
         function updateOutputHTML() {
-            const codeArea = document.getElementById('outputCode');
-            codeArea.value = generateHTMLCode(treeData);
+            const htmlCode = generateHTMLCode(treeData);
+            const previewFrame = document.getElementById('previewFrame');
+            if (previewFrame) {
+                previewFrame.srcdoc = htmlCode;
+            }
             saveToLocalStorage();
         }
 
@@ -972,7 +1009,8 @@
                 
                 for (const node of nodes) {
                     if (node.type === 'folder') {
-                        html += `${indent}<details>\n`;
+                        const openAttr = node.open ? ' open' : '';
+                        html += `${indent}<details${openAttr}>\n`;
                         html += `${indent}    <summary>${escapeHtml(cleanTitle(node.title, '📁'))}</summary>\n`;
                         html += `${indent}    <div class="sub-folder-container">\n`;
                         html += buildHTML(node.children || [], indentLevel + 2);
@@ -1160,7 +1198,7 @@ ${bodyContent}
 
         // ダウンロード
         function downloadHTML() {
-            const htmlContent = document.getElementById('outputCode').value;
+            const htmlContent = generateHTMLCode(treeData);
             const blob = new Blob([htmlContent], { type: 'text/html' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -1171,9 +1209,25 @@ ${bodyContent}
 
         // コードコピー
         function copyToClipboard() {
-            const codeArea = document.getElementById('outputCode');
-            codeArea.select();
+            const htmlContent = generateHTMLCode(treeData);
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(htmlContent).then(() => {
+                    alert('HTMLコードをクリップボードにコピーしました！');
+                }).catch(() => {
+                    fallbackCopy(htmlContent);
+                });
+            } else {
+                fallbackCopy(htmlContent);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
             document.execCommand('copy');
+            document.body.removeChild(textarea);
             alert('HTMLコードをクリップボードにコピーしました！');
         }
 
@@ -1195,11 +1249,12 @@ ${bodyContent}
                             const summary = child.querySelector(':scope > summary');
                             let rawTitle = summary ? summary.textContent.trim() : 'フォルダ';
                             let title = rawTitle.replace(/^📁\s*/, '');
+                            const isOpen = child.hasAttribute('open');
                             
                             const subContainer = child.querySelector(':scope > .sub-folder-container');
                             const children = subContainer ? parseContainer(subContainer) : [];
                             
-                            nodes.push({ id: 'node_' + Math.random().toString(36).substr(2, 9), type: 'folder', title: title, children: children });
+                            nodes.push({ id: 'node_' + Math.random().toString(36).substr(2, 9), type: 'folder', title: title, open: isOpen, children: children });
                         } else if (child.tagName.toLowerCase() === 'a' && child.classList.contains('folder-link')) {
                             if (child.classList.contains('setup-link')) continue;
                             
