@@ -3,7 +3,7 @@ set "INSTALL_DIR=%APPDATA%\OpenFolderProtocol"
 if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
 
 :: open-folder.js をダウンロード
-powershell -NoProfile -Command "(New-Object System.Net.WebClient).DownloadFile('https://proton-wind.github.io/folder-widget/open-folder.js', '%INSTALL_DIR%\open-folder.js')"
+powershell -NoProfile -Command "(New-Object System.Net.WebClient).DownloadFile('https://meiden-widget.nd.meiden.ed.jp/h-folder-widget/open-folder.js', '%INSTALL_DIR%\open-folder.js')"
 
 :: レジストリ登録
 reg add "HKCU\Software\Classes\open-folder" /ve /t REG_SZ /d "URL:Open Folder Protocol" /f >nul
